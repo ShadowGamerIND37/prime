@@ -113,7 +113,7 @@
 Run the full automated installer directly from the web or locally (installs Node.js 20 LTS, PM2, dependencies, generates `.env`, seeds database, and starts PM2 with boot autostart):
 ```bash
 # Instant One-Liner from GitHub
-bash <(curl -sSL https://raw.githubusercontent.com/shadow/Prime-Minecraft/main/menu.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/ShadowGamerIND37/prime/main/menu.sh)
 
 # Or locally
 ./menu.sh auto -y
