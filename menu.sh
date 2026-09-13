@@ -1,0 +1,705 @@
+#!/usr/bin/env bash
+
+# ==============================================================================
+#                      🎮 PRIME MINECRAFT MANAGEMENT SCRIPT (menu.sh)
+#     Supports: Auto Install, Auto Setup, Auto Update, PM2, User Creator
+# ==============================================================================
+
+# Text Color Codes
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+PURPLE='\033[0;35m'
+CYAN='\033[0;36m'
+WHITE='\033[1;37m'
+BOLD='\033[1m'
+NC='\033[0m' # No Color
+
+# Determine current directory
+PRIME_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$PRIME_DIR" || exit 1
+
+INTERACTIVE_MENU=false
+
+wait_prompt() {
+    if [ "$INTERACTIVE_MENU" = true ] && [ -t 0 ]; then
+        echo ""
+        read -n 1 -s -r -p "Press any key to return to menu..."
+        echo ""
+    fi
+}
+
+# Detect Sudo capability
+get_sudo() {
+    if [ "$EUID" -ne 0 ]; then
+        if command -v sudo &>/dev/null; then
+            echo "sudo"
+        else
+            echo ""
+        fi
+    else
+        echo ""
+    fi
+}
+SUDO=$(get_sudo)
+
+# Detect Package Manager
+detect_pkg_mgr() {
+    if command -v apt-get &>/dev/null; then
+        echo "apt"
+    elif command -v dnf &>/dev/null; then
+        echo "dnf"
+    elif command -v yum &>/dev/null; then
+        echo "yum"
+    elif command -v apk &>/dev/null; then
+        echo "apk"
+    elif command -v pacman &>/dev/null; then
+        echo "pacman"
+    else
+        echo "unknown"
+    fi
+}
+
+# Detect Server IP (Public or Local LAN)
+get_server_ip() {
+    local ip=""
+    ip=$(curl -s --max-time 2 https://api.ipify.org 2>/dev/null || curl -s --max-time 2 https://ifconfig.me 2>/dev/null)
+    if [ -z "$ip" ]; then
+        ip=$(hostname -I 2>/dev/null | awk '{print $1}')
+    fi
+    if [ -z "$ip" ]; then
+        ip="localhost"
+    fi
+    echo "$ip"
+}
+
+# Display Banner
+show_banner() {
+    clear
+    local host_ip
+    host_ip=$(get_server_ip)
+    echo -e "${CYAN}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${CYAN}║${WHITE}         🎮  PRIME MINECRAFT - NODE.JS MANAGEMENT SUITE           ${CYAN}║${NC}"
+    echo -e "${CYAN}╠══════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${CYAN}║${NC}  • Web Panel UI:    ${GREEN}http://${host_ip}:3001${NC}"
+    echo -e "${CYAN}║${NC}  • Daemon/API Port: ${GREEN}http://${host_ip}:3003${NC}"
+    echo -e "${CYAN}║${NC}  • SFTP Port:       ${GREEN}sftp://${host_ip}:3004${NC}"
+    echo -e "${CYAN}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+}
+
+# ==============================================================================
+# 1. AUTO INSTALL + AUTO SETUP
+# ==============================================================================
+auto_install_mpanel() {
+    local unattended=false
+    local admin_user=""
+    local admin_pass=""
+    local admin_email=""
+    local custom_creds=false
+
+    # Parse any CLI arguments passed directly
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            -y|--yes|--unattended|--auto)
+                unattended=true
+                shift
+                ;;
+            -u|--user|--admin-user)
+                admin_user="$2"
+                custom_creds=true
+                shift 2
+                ;;
+            -p|--pass|--password|--admin-pass)
+                admin_pass="$2"
+                custom_creds=true
+                shift 2
+                ;;
+            -e|--email|--admin-email)
+                admin_email="$2"
+                shift 2
+                ;;
+            *)
+                shift
+                ;;
+        esac
+    done
+
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}      🚀 Prime Minecraft Automated Installation & Setup        ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+
+    # --- Step 1: System Package Prerequisites ---
+    echo -e "${BLUE}[1/6]${NC} 🔍 Checking system packages & dependencies..."
+    local pkg_mgr
+    pkg_mgr=$(detect_pkg_mgr)
+
+    local missing_pkgs=()
+    for cmd in curl wget git tar unzip; do
+        if ! command -v "$cmd" &>/dev/null; then
+            missing_pkgs+=("$cmd")
+        fi
+    done
+
+    if [ ${#missing_pkgs[@]} -gt 0 ]; then
+        echo -e "${YELLOW}⚠️ Installing missing tools: ${missing_pkgs[*]}...${NC}"
+        case "$pkg_mgr" in
+            apt)
+                $SUDO apt-get update -qq
+                $SUDO apt-get install -y -qq "${missing_pkgs[@]}" build-essential sqlite3
+                ;;
+            dnf)
+                $SUDO dnf install -y "${missing_pkgs[@]}" gcc gcc-c++ make sqlite
+                ;;
+            yum)
+                $SUDO yum install -y "${missing_pkgs[@]}" gcc gcc-c++ make sqlite
+                ;;
+            apk)
+                $SUDO apk add --no-cache "${missing_pkgs[@]}" build-base sqlite
+                ;;
+            pacman)
+                $SUDO pacman -Sy --noconfirm "${missing_pkgs[@]}" base-devel sqlite
+                ;;
+            *)
+                echo -e "${YELLOW}ℹ️ Unknown package manager. Please ensure git, curl, and build tools are installed.${NC}"
+                ;;
+        esac
+    else
+        echo -e "${GREEN}✅ Essential system tools verified.${NC}"
+    fi
+
+    # --- Step 2: Node.js Check (Requires >= 18) ---
+    echo ""
+    echo -e "${BLUE}[2/6]${NC} 🔍 Checking Node.js runtime environment..."
+    local node_ok=false
+    if command -v node &>/dev/null; then
+        local node_ver
+        node_ver=$(node -v | tr -d 'v')
+        local node_major
+        node_major=$(echo "$node_ver" | cut -d. -f1)
+        if [ "$node_major" -ge 18 ]; then
+            node_ok=true
+            echo -e "${GREEN}✅ Node.js detected: v${node_ver} (>= 18.0.0 required)${NC}"
+        else
+            echo -e "${YELLOW}⚠️ Node.js v${node_ver} is too old. Node.js 20 LTS is required.${NC}"
+        fi
+    fi
+
+    if [ "$node_ok" = false ]; then
+        echo -e "${CYAN}📥 Installing Node.js 20.x LTS...${NC}"
+        case "$pkg_mgr" in
+            apt)
+                curl -fsSL https://deb.nodesource.com/setup_20.x | $SUDO bash -
+                $SUDO apt-get install -y nodejs
+                ;;
+            dnf|yum)
+                curl -fsSL https://rpm.nodesource.com/setup_20.x | $SUDO bash -
+                $SUDO "$pkg_mgr" install -y nodejs
+                ;;
+            *)
+                echo -e "${RED}❌ Please install Node.js >= 18 LTS manually on this system.${NC}"
+                exit 1
+                ;;
+        esac
+        echo -e "${GREEN}✅ Node.js installed: $(node -v 2>/dev/null)${NC}"
+    fi
+
+    # --- Step 3: PM2 Process Manager ---
+    echo ""
+    echo -e "${BLUE}[3/6]${NC} 🔍 Checking PM2 Process Manager..."
+    if ! command -v pm2 &>/dev/null; then
+        echo -e "${YELLOW}⚠️ PM2 not found. Installing PM2 globally...${NC}"
+        if [ -n "$SUDO" ]; then
+            $SUDO npm install -g pm2
+        else
+            npm install -g pm2
+        fi
+    fi
+    echo -e "${GREEN}✅ PM2 detected: $(pm2 -v 2>/dev/null)${NC}"
+
+    # --- Step 4: NPM Dependencies ---
+    echo ""
+    echo -e "${BLUE}[4/6]${NC} 📦 Installing Node.js dependencies (npm install)...${NC}"
+    npm install --no-audit --fund=false
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ npm install encountered an error. Retrying with --force...${NC}"
+        npm install --force
+    fi
+    echo -e "${GREEN}✅ Project dependencies installed successfully.${NC}"
+
+    # --- Step 5: Database & Admin Configuration ---
+    echo ""
+    echo -e "${BLUE}[5/6]${NC} ⚙️  Configuring environment and initializing database..."
+
+    # Check admin setup preference if not specified via CLI and interactive
+    if [ "$custom_creds" = false ] && [ "$unattended" = false ] && [ -t 0 ]; then
+        echo ""
+        echo -e "${PURPLE}Choose Administrator account setup option:${NC}"
+        echo -e "  ${CYAN}[1]${NC} Quick Default Admin (${WHITE}username: admin${NC} | ${WHITE}password: admin${NC}) [Recommended]"
+        echo -e "  ${CYAN}[2]${NC} Custom Username & Password"
+        echo -e "  ${CYAN}[3]${NC} Auto-generate Random Secure Password"
+        echo ""
+        read -p "Select option [1-3, default: 1]: " admin_choice
+        case "$admin_choice" in
+            2)
+                read -p "Enter Administrator Username: " admin_user
+                read -p "Enter Administrator Email [default: ${admin_user}@prime-minecraft.local]: " admin_email
+                read -s -p "Enter Administrator Password: " admin_pass
+                echo ""
+                if [ -z "$admin_email" ]; then
+                    admin_email="${admin_user}@prime-minecraft.local"
+                fi
+                custom_creds=true
+                ;;
+            3)
+                admin_user="admin"
+                admin_email="admin@prime-minecraft.local"
+                admin_pass=$(head /dev/urandom | tr -dc A-Za-z0-9 | head -c 12)
+                custom_creds=true
+                ;;
+            *)
+                admin_user="admin"
+                admin_pass="admin"
+                admin_email="admin@prime-minecraft.local"
+                custom_creds=true
+                ;;
+        esac
+    fi
+
+    local setup_args=()
+    if [ "$custom_creds" = true ] && [ -n "$admin_user" ] && [ -n "$admin_pass" ]; then
+        setup_args+=(--admin-user "$admin_user" --admin-pass "$admin_pass")
+        if [ -n "$admin_email" ]; then
+            setup_args+=(--admin-email "$admin_email")
+        fi
+    fi
+
+    # Run automated setup script
+    node bin/setup.js "${setup_args[@]}"
+
+    # --- Step 6: PM2 Launch & System Boot Autostart ---
+    echo ""
+    echo -e "${BLUE}[6/6]${NC} ⚡ Starting Prime Minecraft via PM2 & configuring boot autostart..."
+    if pm2 list 2>/dev/null | grep -q "mpanel"; then
+        pm2 restart ecosystem.config.js
+    else
+        pm2 start ecosystem.config.js
+    fi
+    pm2 save
+
+    # Auto-configure system startup if possible
+    if [ -n "$SUDO" ] || [ "$EUID" -eq 0 ]; then
+        local startup_cmd
+        startup_cmd=$(pm2 startup 2>&1 | grep "sudo env PATH" || true)
+        if [ -n "$startup_cmd" ]; then
+            eval "$startup_cmd" &>/dev/null || true
+            pm2 save &>/dev/null || true
+        fi
+    fi
+
+    # Check Firewall (UFW / Firewalld)
+    if command -v ufw &>/dev/null; then
+        if $SUDO ufw status 2>/dev/null | grep -q "Status: active"; then
+            $SUDO ufw allow 3001/tcp comment 'Prime Minecraft Web UI' &>/dev/null || true
+            $SUDO ufw allow 3003/tcp comment 'Prime Minecraft Daemon API' &>/dev/null || true
+            $SUDO ufw allow 3004/tcp comment 'Prime Minecraft SFTP Server' &>/dev/null || true
+            echo -e "${GREEN}✅ Configured UFW firewall rules for ports 3001, 3003, 3004.${NC}"
+        fi
+    fi
+
+    # Summary Display
+    local host_ip
+    host_ip=$(get_server_ip)
+    local display_user="${admin_user:-admin}"
+    local display_pass="${admin_pass:-admin}"
+
+    echo ""
+    echo -e "${GREEN}╔══════════════════════════════════════════════════════════════╗${NC}"
+    echo -e "${GREEN}║${WHITE}          🎉  MPANEL AUTO INSTALL & SETUP COMPLETE!           ${GREEN}║${NC}"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${NC}  🌐 Web Panel URL:    ${CYAN}http://${host_ip}:3001${NC}"
+    echo -e "${GREEN}║${NC}  ⚙️  Daemon/API Port:  ${CYAN}http://${host_ip}:3003${NC}"
+    echo -e "${GREEN}║${NC}  📁 SFTP Host/Port:   ${CYAN}sftp://${host_ip}:3004${NC}"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${WHITE}  👑 Administrator Credentials:                               ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}  • Username: ${YELLOW}${display_user}${NC}"
+    echo -e "${GREEN}║${NC}  • Password: ${YELLOW}${display_pass}${NC}"
+    echo -e "${GREEN}║${NC}  • Role:     ${WHITE}ADMINISTRATOR${NC}"
+    echo -e "${GREEN}╠══════════════════════════════════════════════════════════════╣${NC}"
+    echo -e "${GREEN}║${NC}  ⚡ PM2 Service: ${GREEN}ONLINE${NC} (Autostart on boot configured)      ${GREEN}║${NC}"
+    echo -e "${GREEN}║                                                              ║${NC}"
+    echo -e "${GREEN}║${WHITE}  Helpful Management Commands:                                 ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}  • Management Menu: ${CYAN}./menu.sh${NC}                                 ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}  • Live Logs:       ${CYAN}pm2 logs prime-minecraft${NC}                           ${GREEN}║${NC}"
+    echo -e "${GREEN}║${NC}  • Restart Server:  ${CYAN}pm2 restart prime-minecraft${NC}                        ${GREEN}║${NC}"
+    echo -e "${GREEN}╚══════════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+
+    wait_prompt
+}
+
+# Alias install_mpanel to auto_install_mpanel
+install_mpanel() {
+    auto_install_mpanel "$@"
+}
+
+# ==============================================================================
+# 2. CREATE USER
+# ==============================================================================
+create_user() {
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}             👤 Create Prime Minecraft User                   ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+    node bin/createuser.js "$@"
+    echo ""
+    wait_prompt
+}
+
+# ==============================================================================
+# 3. UPDATE MPANEL (Auto Update)
+# ==============================================================================
+update_prime() {
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}             🔄 Updating Prime Minecraft (Auto Update)         ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+
+    # Pull git updates if repository
+    if [ -d ".git" ]; then
+        echo -e "${CYAN}📥 Pulling latest git updates...${NC}"
+        git pull || echo -e "${YELLOW}⚠️ Git pull returned a warning.${NC}"
+    else
+        echo -e "${YELLOW}ℹ️ Not a git repository, skipping git pull.${NC}"
+    fi
+
+    # Update dependencies
+    echo ""
+    echo -e "${CYAN}📦 Updating dependencies (npm install)...${NC}"
+    npm install --no-audit --fund=false
+
+    # Run setup migration (ensures new tables, directories, and env are intact)
+    echo ""
+    echo -e "${CYAN}🔨 Verifying database schema & runtime directories...${NC}"
+    node bin/setup.js --skip-admin
+
+    # Check and restart PM2
+    echo ""
+    if command -v pm2 &>/dev/null && pm2 list 2>/dev/null | grep -q "mpanel"; then
+        echo -e "${CYAN}🔄 Restarting Prime Minecraft in PM2...${NC}"
+        pm2 restart prime-minecraft
+        pm2 save
+        echo -e "${GREEN}✅ PM2 process restarted successfully.${NC}"
+    else
+        echo -e "${YELLOW}ℹ️ PM2 process not currently active. Start via option 3 or './menu.sh pm2'.${NC}"
+    fi
+
+    echo ""
+    echo -e "${GREEN}======================================================${NC}"
+    echo -e "${GREEN}  🎉 Prime Minecraft has been updated successfully!             ${NC}"
+    echo -e "${GREEN}======================================================${NC}"
+    echo ""
+
+    wait_prompt
+}
+
+# ==============================================================================
+# 4. PM2 PROCESS MANAGER SUBMENU
+# ==============================================================================
+pm2_menu() {
+    # If sub-action passed via CLI
+    if [ "$1" == "start" ]; then
+        pm2 start ecosystem.config.js && pm2 save
+        return
+    elif [ "$1" == "stop" ]; then
+        pm2 stop mpanel && pm2 save
+        return
+    elif [ "$1" == "restart" ]; then
+        pm2 restart mpanel
+        return
+    elif [ "$1" == "logs" ]; then
+        pm2 logs mpanel
+        return
+    elif [ "$1" == "status" ]; then
+        pm2 status
+        return
+    fi
+
+    while true; do
+        clear
+        echo -e "${PURPLE}╔══════════════════════════════════════════════════════════════╗${NC}"
+        echo -e "${PURPLE}║${WHITE}                 ⚡ PM2 PROCESS MANAGER                       ${PURPLE}║${NC}"
+        echo -e "${PURPLE}╚══════════════════════════════════════════════════════════════╝${NC}"
+        echo ""
+        echo -e "  ${CYAN}[1]${NC} Start Prime Minecraft in Background (PM2)"
+        echo -e "  ${CYAN}[2]${NC} Stop Prime Minecraft (PM2)"
+        echo -e "  ${CYAN}[3]${NC} Restart Prime Minecraft (PM2)"
+        echo -e "  ${CYAN}[4]${NC} View PM2 Status"
+        echo -e "  ${CYAN}[5]${NC} View Live Logs (pm2 logs)"
+        echo -e "  ${CYAN}[6]${NC} Enable Autostart on Server Boot (pm2 startup & save)"
+        echo -e "  ${CYAN}[0]${NC} Back to Main Menu"
+        echo ""
+        read -p "Select an option [0-6]: " pm2_opt
+
+        case $pm2_opt in
+            1)
+                echo -e "${CYAN}Starting Prime Minecraft via PM2...${NC}"
+                pm2 start ecosystem.config.js
+                pm2 save
+                read -n 1 -s -r -p "Press any key to continue..."
+                ;;
+            2)
+                echo -e "${YELLOW}Stopping Prime Minecraft...${NC}"
+                pm2 stop prime-minecraft
+                pm2 save
+                read -n 1 -s -r -p "Press any key to continue..."
+                ;;
+            3)
+                echo -e "${CYAN}Restarting Prime Minecraft...${NC}"
+                pm2 restart prime-minecraft
+                read -n 1 -s -r -p "Press any key to continue..."
+                ;;
+            4)
+                echo -e "${CYAN}PM2 Status:${NC}"
+                pm2 status
+                read -n 1 -s -r -p "Press any key to continue..."
+                ;;
+            5)
+                echo -e "${CYAN}Opening PM2 Logs (Press Ctrl+C to return)...${NC}"
+                pm2 logs prime-minecraft
+                ;;
+            6)
+                echo -e "${CYAN}Configuring system startup...${NC}"
+                local startup_cmd
+                startup_cmd=$(pm2 startup 2>&1 | grep "sudo env PATH" || true)
+                if [ -n "$startup_cmd" ]; then
+                    eval "$startup_cmd" 2>/dev/null || true
+                fi
+                pm2 save
+                echo -e "${GREEN}✅ Autostart on boot configured!${NC}"
+                read -n 1 -s -r -p "Press any key to continue..."
+                ;;
+            0)
+                break
+                ;;
+            *)
+                echo -e "${RED}Invalid option.${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+# ==============================================================================
+# 5. START IN FOREGROUND (Debug Mode)
+# ==============================================================================
+start_foreground() {
+    echo -e "${CYAN}Starting Prime Minecraft in foreground (Press Ctrl+C to stop)...${NC}"
+    node src/index.js
+}
+
+# ==============================================================================
+# 6. STATUS & PORT CHECK
+# ==============================================================================
+status_check() {
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}             📊 Prime Minecraft Service Status                 ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+
+    local host_ip
+    host_ip=$(get_server_ip)
+    echo -e "Server Host IP: ${GREEN}${host_ip}${NC}"
+    echo -e "Directory:      ${GREEN}$PRIME_DIR${NC}"
+    
+    # Check Ports
+    echo ""
+    echo -e "${WHITE}Port Status:${NC}"
+    for port in 3001 3003 3004; do
+        if ss -tuln 2>/dev/null | grep -q ":$port " || netstat -tuln 2>/dev/null | grep -q ":$port "; then
+            echo -e " • Port ${CYAN}$port${NC}: ${GREEN}ACTIVE (Listening)${NC}"
+        else
+            echo -e " • Port ${CYAN}$port${NC}: ${RED}INACTIVE (Closed)${NC}"
+        fi
+    done
+
+    echo ""
+    # Database
+    if [ -f "data/mpanel.sqlite" ]; then
+        local db_size
+        db_size=$(du -h data/mpanel.sqlite | awk '{print $1}')
+        echo -e "Database: ${GREEN}data/mpanel.sqlite (${db_size})${NC}"
+    else
+        echo -e "Database: ${RED}Not initialized${NC}"
+    fi
+
+    echo ""
+    # PM2 Process check
+    if command -v pm2 &> /dev/null; then
+        pm2 list
+    fi
+
+    echo ""
+    wait_prompt
+}
+
+# ==============================================================================
+# 7. UNINSTALL PRIME MINECRAFT
+# ==============================================================================
+uninstall_prime() {
+    echo -e "${RED}======================================================${NC}"
+    echo -e "${RED}⚠️  DANGER: UNINSTALL PRIME MINECRAFT                           ${NC}"
+    echo -e "${RED}======================================================${NC}"
+    echo ""
+    echo -e "${YELLOW}This action can stop PM2 services and remove Prime Minecraft files.${NC}"
+    read -p "Are you absolutely sure you want to uninstall Prime Minecraft? (type 'YES' to confirm): " confirm_uninstall
+
+    if [ "$confirm_uninstall" == "YES" ]; then
+        echo -e "${YELLOW}Stopping PM2 processes...${NC}"
+        if command -v pm2 &> /dev/null; then
+            pm2 delete prime-minecraft 2>/dev/null
+            pm2 save 2>/dev/null
+        fi
+
+        read -p "Do you want to delete server files and database too? (y/n): " delete_data
+        if [[ "$delete_data" =~ ^[Yy]$ ]]; then
+            echo -e "${RED}Removing data and server files...${NC}"
+            rm -rf data prime node_modules
+        else
+            echo -e "${CYAN}Preserving data and server files. Removing node_modules only...${NC}"
+            rm -rf node_modules
+        fi
+
+        echo ""
+        echo -e "${GREEN}✅ Prime Minecraft has been uninstalled.${NC}"
+    else
+        echo -e "${GREEN}Uninstall cancelled.${NC}"
+    fi
+    echo ""
+    wait_prompt
+}
+
+# ==============================================================================
+# 8. PLAYIT.GG SYSTEM CLI
+# ==============================================================================
+install_playit_cli() {
+    echo -e "${CYAN}======================================================${NC}"
+    echo -e "${WHITE}      🌐 Installing Playit.gg System CLI (Native)     ${NC}"
+    echo -e "${CYAN}======================================================${NC}"
+    echo ""
+
+    if command -v playit &> /dev/null; then
+        local playit_ver
+        playit_ver=$(playit version 2>/dev/null || echo "installed")
+        echo -e "${GREEN}✅ Playit CLI is already installed (${playit_ver})!${NC}"
+        echo ""
+        read -p "Do you want to reinstall/update Playit CLI? (y/n): " reinstall_choice
+        if [[ ! "$reinstall_choice" =~ ^[Yy]$ ]]; then
+            return
+        fi
+    fi
+
+    echo -e "${CYAN}🔑 1/4 Adding Playit.gg GPG Keyring...${NC}"
+    curl -SsL https://packages.playit.gg/keys/playit.gpg | gpg --dearmor | $SUDO tee /usr/share/keyrings/playit.gpg >/dev/null
+    $SUDO chmod 0644 /usr/share/keyrings/playit.gpg
+
+    echo -e "${CYAN}📦 2/4 Adding Playit APT Repository...${NC}"
+    $SUDO curl -fsSL -o /etc/apt/sources.list.d/playit.list https://packages.playit.gg/repo-files/playit-debian.list
+
+    echo -e "${CYAN}🔄 3/4 Updating Package Lists...${NC}"
+    $SUDO apt update
+    echo -e "${CYAN}🚀 4/4 Installing Playit.gg CLI...${NC}"
+    $SUDO apt install -y playit
+
+    if command -v playit &> /dev/null; then
+        echo ""
+        echo -e "${GREEN}======================================================${NC}"
+        echo -e "${GREEN}  🎉 Playit CLI installed successfully!               ${NC}"
+        echo -e "${GREEN}  Version: $(playit version 2>/dev/null || echo 'Latest')                      ${NC}"
+        echo -e "${GREEN}======================================================${NC}"
+        echo -e "${WHITE}Usage commands:${NC}"
+        echo -e " • Run agent:    ${CYAN}playit${NC}"
+        echo -e " • Start daemon: ${CYAN}playit start${NC}"
+        echo -e " • Check status: ${CYAN}playit status${NC}"
+    else
+        echo -e "${RED}❌ Failed to install Playit CLI. Please check your system logs.${NC}"
+    fi
+
+    echo ""
+    wait_prompt
+}
+
+# ==============================================================================
+# MAIN INTERACTIVE MENU LOOP
+# ==============================================================================
+main_menu() {
+    INTERACTIVE_MENU=true
+    while true; do
+        show_banner
+        echo -e "  ${CYAN}[1]${NC} 🚀 Auto Install & Setup (Full Automated Setup & Start)"
+        echo -e "  ${CYAN}[2]${NC} 👤 Create User / Admin (createuser)"
+        echo -e "  ${CYAN}[3]${NC} ⚡ PM2 Process Manager (Start/Stop/Restart/Logs)"
+        echo -e "  ${CYAN}[4]${NC} 🔄 Auto Update Prime Minecraft (Git pull, DB migrate & PM2 restart)"
+        echo -e "  ${CYAN}[5]${NC} 🐞 Start in Foreground (Debug Mode)"
+        echo -e "  ${CYAN}[6]${NC} 📊 Check System & Port Status"
+        echo -e "  ${CYAN}[7]${NC} 🌐 Install Playit.gg System Tunnel (playit CLI)"
+        echo -e "  ${CYAN}[8]${NC} 🗑️  Uninstall Prime Minecraft"
+        echo -e "  ${CYAN}[0]${NC} 🚪 Exit"
+        echo ""
+        read -p "Please select an option [0-8]: " choice
+
+        case $choice in
+            1) auto_install_mpanel ;;
+            2) create_user ;;
+            3) pm2_menu ;;
+            4) update_prime ;;
+            5) start_foreground ;;
+            6) status_check ;;
+            7) install_playit_cli ;;
+            8) uninstall_prime ;;
+            0)
+                echo -e "${GREEN}Goodbye!${NC}"
+                exit 0
+                ;;
+            *)
+                echo -e "${RED}Invalid selection. Please choose 0-8.${NC}"
+                sleep 1
+                ;;
+        esac
+    done
+}
+
+# ==============================================================================
+# CLI Direct Flag Handler
+# ==============================================================================
+CMD="$1"
+shift || true
+
+case "$CMD" in
+    install|setup|auto|auto-install)
+        auto_install_mpanel "$@"
+        ;;
+    update|auto-update)
+        update_prime "$@"
+        ;;
+    usercreate|usercrate|createuser)
+        create_user "$@"
+        ;;
+    pm2)
+        pm2_menu "$@"
+        ;;
+    status)
+        status_check "$@"
+        ;;
+    playit|playit-cli)
+        install_playit_cli "$@"
+        ;;
+    uninstall)
+        uninstall_prime "$@"
+        ;;
+    *)
+        main_menu
+        ;;
+esac
