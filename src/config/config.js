@@ -28,15 +28,38 @@ module.exports = {
   DEFAULT_THEME: {
     transparency: 18, // 0 - 100%
     blur: 16,        // 0 - 40px
-    wallpaper: 'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?auto=format&fit=crop&w=3840&q=90', // Full pitch black minimalist OLED
-    wallpaperCategory: 'black-dark',
+    wallpaper: '/assets/dark-angel-rising.3840x2160.mp4',
+    wallpaperCategory: 'animated',
+    wallpaperAnimated: true,
     logo: '/assets/prime-minecraft-logo.svg',
     favicon: '/assets/favicon.svg',
     themeMode: 'dark',
     musicUrl: '',
     musicTitle: 'Default Chill Synth',
     musicEnabled: false,
-    musicVolume: 30
+    musicVolume: 30,
+    // Theme Colors
+    primaryColor: '#0ea5e9',       // Cyan-500
+    secondaryColor: '#a855f7',     // Purple-500
+    accentColor: '#f43f5e',        // Rose-500
+    successColor: '#22c55e',       // Green-500
+    warningColor: '#f59e0b',       // Amber-500
+    errorColor: '#ef4444',         // Red-500
+    backgroundColor: '#020617',    // Slate-950
+    surfaceColor: '#0f172a',       // Slate-900
+    cardColor: '#1e293b',          // Slate-800
+    borderColor: '#334155',        // Slate-700
+    textPrimary: '#f8fafc',        // Slate-50
+    textSecondary: '#94a3b8',      // Slate-400
+    textMuted: '#64748b',          // Slate-500
+    // Gradient Settings
+    gradientEnabled: true,
+    gradientFrom: '#0ea5e9',
+    gradientVia: '#a855f7',
+    gradientTo: '#f43f5e',
+    // Custom Theme Name
+    themeName: 'Default Cyber',
+    themePreset: 'cyber'
   }
 };
 

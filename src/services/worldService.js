@@ -32,7 +32,7 @@ class WorldService {
         icon: '🏝️',
         bannerColor: 'from-amber-500/20 to-emerald-500/20',
         description: 'The iconic L-shaped floating island with an oak tree and a starter chest. Survive, bridge, and conquer the void.',
-        downloadUrl: 'https://raw.githubusercontent.com/ShadowGamerIND37/minecraft-templates/main/maps/skyblock.zip',
+        downloadUrl: 'https://raw.githubusercontent.com/nobita329/minecraft-templates/main/maps/skyblock.zip',
         isCurated: true
       },
       {
@@ -47,7 +47,7 @@ class WorldService {
         icon: '📦',
         bannerColor: 'from-purple-500/20 to-pink-500/20',
         description: 'Start on a single infinite block in the sky. Mine it repeatedly to unlock 10 distinct progression phases from Plains to End!',
-        downloadUrl: 'https://raw.githubusercontent.com/nobita329/minecraft-templates/main/maps/oneblock.zip'',
+        downloadUrl: 'https://raw.githubusercontent.com/nobita329/minecraft-templates/main/maps/oneblock.zip',
         isCurated: true
       },
       {
@@ -77,7 +77,7 @@ class WorldService {
         icon: '🏃',
         bannerColor: 'from-cyan-500/20 to-blue-600/20',
         description: 'A colossal spiral tower reaching the skybox, featuring multi-biome themes, checkpoints, and parkour challenges.',
-        downloadUrl: 'https://raw.githubusercontent.com/ShadowGamerIND37/minecraft-templates/main/maps/parkour.zip',
+        downloadUrl: 'https://raw.githubusercontent.com/nobita329/minecraft-templates/main/maps/parkour.zip',
         isCurated: true
       },
       {

@@ -92,6 +92,7 @@ router.put('/', authenticate, requireAdmin, async (req, res) => {
       'panel_bg',
       'panel_bg_type',
       'panel_bg_category',
+      'panel_bg_animated',
       'panel_music_url',
       'panel_music_title',
       'panel_music_enabled',
@@ -100,7 +101,29 @@ router.put('/', authenticate, requireAdmin, async (req, res) => {
       'blur_bar',
       'registration_enabled',
       'theme_mode',
-      'auto_save_enabled'
+      'auto_save_enabled',
+      // Theme Colors
+      'theme_primary_color',
+      'theme_secondary_color',
+      'theme_accent_color',
+      'theme_success_color',
+      'theme_warning_color',
+      'theme_error_color',
+      'theme_background_color',
+      'theme_surface_color',
+      'theme_card_color',
+      'theme_border_color',
+      'theme_text_primary',
+      'theme_text_secondary',
+      'theme_text_muted',
+      // Gradient Settings
+      'theme_gradient_enabled',
+      'theme_gradient_from',
+      'theme_gradient_via',
+      'theme_gradient_to',
+      // Theme Identity
+      'theme_name',
+      'theme_preset'
     ];
 
     for (const [key, value] of Object.entries(updates)) {
@@ -127,15 +150,38 @@ router.post('/reset', authenticate, requireAdmin, async (req, res) => {
     const dt = config.DEFAULT_THEME;
     const defaults = {
       panel_bg: dt.wallpaper,
-      panel_bg_type: 'image',
-      panel_bg_category: dt.wallpaperCategory || 'black-dark',
+      panel_bg_type: 'video',
+      panel_bg_category: dt.wallpaperCategory || 'animated',
+      panel_bg_animated: String(dt.wallpaperAnimated ?? true),
       transparency_bar: String(dt.transparency ?? 18),
       blur_bar: String(dt.blur ?? 16),
       theme_mode: 'dark',
       panel_name: config.DEFAULT_PANEL_NAME,
       favicon_name: config.DEFAULT_PANEL_NAME,
       panel_logo: dt.logo || '/assets/prime-minecraft-logo.svg',
-      favicon_logo: dt.favicon || '/assets/favicon.svg'
+      favicon_logo: dt.favicon || '/assets/favicon.svg',
+      // Theme Colors
+      theme_primary_color: dt.primaryColor,
+      theme_secondary_color: dt.secondaryColor,
+      theme_accent_color: dt.accentColor,
+      theme_success_color: dt.successColor,
+      theme_warning_color: dt.warningColor,
+      theme_error_color: dt.errorColor,
+      theme_background_color: dt.backgroundColor,
+      theme_surface_color: dt.surfaceColor,
+      theme_card_color: dt.cardColor,
+      theme_border_color: dt.borderColor,
+      theme_text_primary: dt.textPrimary,
+      theme_text_secondary: dt.textSecondary,
+      theme_text_muted: dt.textMuted,
+      // Gradient Settings
+      theme_gradient_enabled: String(dt.gradientEnabled),
+      theme_gradient_from: dt.gradientFrom,
+      theme_gradient_via: dt.gradientVia,
+      theme_gradient_to: dt.gradientTo,
+      // Theme Identity
+      theme_name: dt.themeName,
+      theme_preset: dt.themePreset
     };
 
     for (const [key, value] of Object.entries(defaults)) {
@@ -168,6 +214,7 @@ router.post('/upload', authenticate, requireAdmin, uploadBranding.single('file')
     const fileUrl = `/uploads/branding/${req.file.filename}`;
     const fileType = req.body.type; // 'logo' | 'favicon' | 'background' | 'music'
     const isVideo = /\.(mp4|webm|mkv|mov)$/i.test(req.file.originalname);
+    const isAnimated = isVideo || /\.(gif|apng)$/i.test(req.file.originalname);
 
     if (fileType) {
       const keyMap = {
@@ -188,6 +235,10 @@ router.post('/upload', authenticate, requireAdmin, uploadBranding.single('file')
             'INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP',
             ['panel_bg_type', isVideo ? 'video' : 'image']
           );
+          await query.run(
+            'INSERT INTO settings (key, value, updated_at) VALUES (?, ?, CURRENT_TIMESTAMP) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = CURRENT_TIMESTAMP',
+            ['panel_bg_animated', isAnimated ? '1' : '0']
+          );
         }
       }
     }
@@ -198,7 +249,8 @@ router.post('/upload', authenticate, requireAdmin, uploadBranding.single('file')
       fileName: req.file.filename,
       originalName: req.file.originalname,
       size: req.file.size,
-      isVideo
+      isVideo,
+      isAnimated
     });
   } catch (err) {
     res.status(500).json({ success: false, error: 'Failed to upload branding asset.' });

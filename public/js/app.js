@@ -136,24 +136,70 @@ class App {
 
     // Apply Background (Image or Video)
     if (s.panel_bg) {
-      const isVideo = s.panel_bg_type === 'video' || /\.(mp4|webm|mkv|mov)($|\?)/i.test(s.panel_bg);
+      const isAnimatedEnabled = s.panel_bg_animated === '1' || s.panel_bg_animated === true;
+      const isVideo = (s.panel_bg_type === 'video' || /\.(mp4|webm|mkv|mov)($|\?)/i.test(s.panel_bg));
+      const isGif = /\.(gif|apng)($|\?)/i.test(s.panel_bg);
+      const useAnimation = isAnimatedEnabled && (isVideo || isGif);
+      
       const vid = document.getElementById('wallpaper-video');
       const wallLayer = document.getElementById('wallpaper-layer');
 
-      if (isVideo && vid) {
+      if (useAnimation && vid) {
+        // Video/GIF mode
         if (vid.src !== s.panel_bg) {
           vid.src = s.panel_bg;
+          vid.load();
         }
-        vid.classList.remove('hidden');
-        if (wallLayer) wallLayer.style.backgroundImage = 'none';
-        vid.play().catch(() => {});
+        vid.classList.add('active');
+        vid.muted = true;
+        vid.loop = true;
+        vid.playsInline = true;
+        
+        // Add error handler to fallback to image
+        vid.onerror = () => {
+          vid.classList.remove('active');
+          vid.style.display = 'none';
+          if (wallLayer) {
+            wallLayer.style.display = 'block';
+            wallLayer.style.backgroundImage = `url('${s.panel_bg}')`;
+          }
+        };
+        
+        const playPromise = vid.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            // Autoplay blocked, video will show first frame
+            vid.pause();
+          });
+        }
+        if (wallLayer) {
+          wallLayer.style.display = 'none';
+          wallLayer.style.backgroundImage = 'none';
+        }
       } else {
+        // Image mode
         if (vid) {
-          vid.classList.add('hidden');
+          vid.classList.remove('active');
           vid.pause();
+          vid.src = '';
         }
-        if (wallLayer) wallLayer.style.backgroundImage = '';
-        document.documentElement.style.setProperty('--panel-bg', `url('${s.panel_bg}')`);
+        if (wallLayer) {
+          wallLayer.style.display = 'block';
+          wallLayer.style.backgroundImage = `url('${s.panel_bg}')`;
+        }
+      }
+    } else {
+      // No background set - clear both
+      const vid = document.getElementById('wallpaper-video');
+      const wallLayer = document.getElementById('wallpaper-layer');
+      if (vid) {
+        vid.classList.remove('active');
+        vid.pause();
+        vid.src = '';
+      }
+      if (wallLayer) {
+        wallLayer.style.display = 'block';
+        wallLayer.style.backgroundImage = 'none';
       }
     }
 
@@ -168,6 +214,77 @@ class App {
     if (s.blur_bar !== undefined) {
       const blur = parseInt(s.blur_bar, 10);
       document.documentElement.style.setProperty('--card-blur', `${Math.max(0, Math.min(40, blur))}px`);
+    }
+
+    // Apply Theme Colors
+    this.applyThemeColors(s);
+  }
+
+  applyThemeColors(s) {
+    const root = document.documentElement;
+
+    // Helper to convert hex to rgba
+    const hexToRgba = (hex, alpha) => {
+      const r = parseInt(hex.slice(1, 3), 16);
+      const g = parseInt(hex.slice(3, 5), 16);
+      const b = parseInt(hex.slice(5, 7), 16);
+      return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+    };
+
+    // Helper to adjust color brightness
+    const adjustColor = (hex, amount) => {
+      const num = parseInt(hex.replace('#', ''), 16);
+      const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+      const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+      const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+      return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+    };
+
+    // Core colors
+    if (s.theme_primary_color) {
+      root.style.setProperty('--theme-primary', s.theme_primary_color);
+      root.style.setProperty('--theme-primary-hover', adjustColor(s.theme_primary_color, -20));
+      root.style.setProperty('--theme-primary-glow', hexToRgba(s.theme_primary_color, 0.5));
+    }
+    if (s.theme_secondary_color) {
+      root.style.setProperty('--theme-secondary', s.theme_secondary_color);
+      root.style.setProperty('--theme-secondary-hover', adjustColor(s.theme_secondary_color, -20));
+    }
+    if (s.theme_accent_color) root.style.setProperty('--theme-accent', s.theme_accent_color);
+    if (s.theme_success_color) root.style.setProperty('--theme-success', s.theme_success_color);
+    if (s.theme_warning_color) root.style.setProperty('--theme-warning', s.theme_warning_color);
+    if (s.theme_error_color) root.style.setProperty('--theme-error', s.theme_error_color);
+
+    // Background & Surface
+    if (s.theme_background_color) root.style.setProperty('--theme-background', s.theme_background_color);
+    if (s.theme_surface_color) root.style.setProperty('--theme-surface', s.theme_surface_color);
+    if (s.theme_card_color) root.style.setProperty('--theme-card', s.theme_card_color);
+    if (s.theme_card_color) root.style.setProperty('--theme-card-hover', adjustColor(s.theme_card_color, 20));
+    if (s.theme_border_color) {
+      root.style.setProperty('--theme-border', s.theme_border_color);
+      root.style.setProperty('--theme-border-light', hexToRgba(s.theme_border_color, 0.5));
+    }
+
+    // Text
+    if (s.theme_text_primary) root.style.setProperty('--theme-text-primary', s.theme_text_primary);
+    if (s.theme_text_secondary) root.style.setProperty('--theme-text-secondary', s.theme_text_secondary);
+    if (s.theme_text_muted) root.style.setProperty('--theme-text-muted', s.theme_text_muted);
+
+    // Gradient
+    if (s.theme_gradient_enabled !== undefined) root.style.setProperty('--theme-gradient-enabled', s.theme_gradient_enabled);
+    if (s.theme_gradient_from) root.style.setProperty('--theme-gradient-from', s.theme_gradient_from);
+    if (s.theme_gradient_via) root.style.setProperty('--theme-gradient-via', s.theme_gradient_via);
+    if (s.theme_gradient_to) root.style.setProperty('--theme-gradient-to', s.theme_gradient_to);
+
+    // Overlay gradient
+    if (s.theme_primary_color && s.theme_secondary_color && s.theme_background_color) {
+      const overlayGradient = `radial-gradient(circle at top right, ${hexToRgba(s.theme_primary_color, 0.15)}, transparent 60%), radial-gradient(circle at bottom left, ${hexToRgba(s.theme_secondary_color, 0.1)}, transparent 60%), ${s.theme_background_color}`;
+      root.style.setProperty('--overlay-gradient', overlayGradient);
+    }
+
+    // Apply preset class for CSS preset styles
+    if (s.theme_preset) {
+      document.documentElement.dataset.theme = s.theme_preset;
     }
   }
 

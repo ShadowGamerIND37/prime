@@ -113,7 +113,7 @@
 Run the full automated installer directly from the web or locally (installs Node.js 20 LTS, PM2, dependencies, generates `.env`, seeds database, and starts PM2 with boot autostart):
 ```bash
 # Instant One-Liner from GitHub
-bash <(curl -sSL https://raw.githubusercontent.com/ShadowGamerIND37/prime/main/menu.sh)
+bash <(curl -sSL https://raw.githubusercontent.com/shadow/Prime-Minecraft/main/menu.sh)
 
 # Or locally
 ./menu.sh auto -y
@@ -144,7 +144,7 @@ Direct shortcuts available:
 ### 3. Manual CLI Setup
 ```bash
 # Clone the repository
-git clone https://github.com/nobita329/Prime-Minecraft.git
+git clone https://github.com/shadow/Prime-Minecraft.git
 cd Prime-Minecraft
 
 # Install dependencies

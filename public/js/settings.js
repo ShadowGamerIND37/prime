@@ -15,8 +15,31 @@ class SettingsManager {
       blur: 16,
       bg: '',
       bgType: 'image',
+      bgAnimated: false,
       themeMode: 'dark',
-      autoSave: true
+      autoSave: true,
+      // Theme Colors
+      primaryColor: '#0ea5e9',
+      secondaryColor: '#a855f7',
+      accentColor: '#f43f5e',
+      successColor: '#22c55e',
+      warningColor: '#f59e0b',
+      errorColor: '#ef4444',
+      backgroundColor: '#020617',
+      surfaceColor: '#0f172a',
+      cardColor: '#1e293b',
+      borderColor: '#334155',
+      textPrimary: '#f8fafc',
+      textSecondary: '#94a3b8',
+      textMuted: '#64748b',
+      // Gradient
+      gradientEnabled: true,
+      gradientFrom: '#0ea5e9',
+      gradientVia: '#a855f7',
+      gradientTo: '#f43f5e',
+      // Theme Identity
+      themeName: 'Default Cyber',
+      themePreset: 'cyber'
     };
   }
 
@@ -100,6 +123,9 @@ class SettingsManager {
                   </button>
                   <button id="tab-btn-favorites" onclick="settingsManager.switchTab('favorites')" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
                     <i data-lucide="heart" class="w-3.5 h-3.5 text-rose-400"></i> Favorites (<span id="fav-count-badge">0</span>)
+                  </button>
+                  <button id="tab-btn-theme" onclick="settingsManager.switchTab('theme')" class="px-3 py-1.5 rounded-lg transition text-slate-400 hover:text-white flex items-center gap-1.5">
+                    <i data-lucide="palette" class="w-3.5 h-3.5 text-amber-400"></i> Theme Editor
                   </button>
                 </div>
               </div>
@@ -213,6 +239,213 @@ class SettingsManager {
                   <!-- Rendered dynamically -->
                 </div>
               </div>
+
+              <!-- VIEW 5: Theme Editor -->
+              <div id="subview-theme" class="hidden space-y-4">
+                <div class="bg-slate-900/60 p-5 rounded-2xl border border-white/10 space-y-5">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <h4 class="text-sm font-bold text-white flex items-center gap-2">
+                        <i data-lucide="palette" class="w-4 h-4 text-amber-400"></i> Theme Color Editor
+                      </h4>
+                      <p class="text-xs text-slate-400 mt-1">Customize every color aspect of the panel. Changes apply in real-time.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button onclick="settingsManager.applyThemePreset('cyber')" class="btn-cyber px-3 py-1.5 rounded-lg text-[11px] font-semibold">Cyber</button>
+                      <button onclick="settingsManager.applyThemePreset('ocean')" class="btn-cyber-purple px-3 py-1.5 rounded-lg text-[11px] font-semibold">Ocean</button>
+                      <button onclick="settingsManager.applyThemePreset('forest')" class="btn-theme-success px-3 py-1.5 rounded-lg text-[11px] font-semibold">Forest</button>
+                      <button onclick="settingsManager.applyThemePreset('sunset')" class="btn-theme-accent px-3 py-1.5 rounded-lg text-[11px] font-semibold">Sunset</button>
+                    </div>
+                  </div>
+
+                  <!-- Theme Presets Grid -->
+                  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-2 p-3 bg-slate-900/40 rounded-xl border border-white/5">
+                    <button onclick="settingsManager.applyThemePreset('cyber')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="cyber" title="Cyber (Default)">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #0ea5e9, #a855f7, #f43f5e)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Cyber</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('ocean')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="ocean" title="Ocean">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #06b6d4, #3b82f6, #ec4899)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Ocean</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('forest')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="forest" title="Forest">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #22c55e, #84cc16, #eab308)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Forest</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('sunset')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="sunset" title="Sunset">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #f97316, #ec4899, #8b5cf6)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Sunset</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('violet')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="violet" title="Violet">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #a855f7, #ec4899, #06b6d4)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Violet</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('blood')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="blood" title="Blood">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #ef4444, #f97316, #fde047)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Blood</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('gold')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="gold" title="Gold">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #f59e0b, #fde047, #ef4444)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Gold</span>
+                    </button>
+                    <button onclick="settingsManager.applyThemePreset('monochrome')" class="theme-preset-btn p-2 rounded-lg border-2 border-transparent hover:border-cyan-500/50 transition" data-preset="monochrome" title="Monochrome">
+                      <div class="w-full h-6 rounded flex items-center justify-center" style="background: linear-gradient(135deg, #ffffff, #a3a3a3, #737373)"></div>
+                      <span class="text-[10px] text-center text-slate-300 mt-1 block">Mono</span>
+                    </button>
+                  </div>
+
+                  <!-- Custom Color Pickers -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Primary</span>
+                        <input type="color" id="theme-primary-color" oninput="settingsManager.onThemeColorChange('primaryColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Primary brand color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Main brand color (buttons, links, accents)</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Secondary</span>
+                        <input type="color" id="theme-secondary-color" oninput="settingsManager.onThemeColorChange('secondaryColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Secondary brand color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Secondary accent color</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Accent</span>
+                        <input type="color" id="theme-accent-color" oninput="settingsManager.onThemeColorChange('accentColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Accent color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Highlight/accent color (destructive actions)</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Success</span>
+                        <input type="color" id="theme-success-color" oninput="settingsManager.onThemeColorChange('successColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Success color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Success/positive state color</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Warning</span>
+                        <input type="color" id="theme-warning-color" oninput="settingsManager.onThemeColorChange('warningColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Warning color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Warning/caution state color</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Error</span>
+                        <input type="color" id="theme-error-color" oninput="settingsManager.onThemeColorChange('errorColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Error color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Error/destructive state color</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Background</span>
+                        <input type="color" id="theme-bg-color" oninput="settingsManager.onThemeColorChange('backgroundColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Background color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Main page background</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Surface</span>
+                        <input type="color" id="theme-surface-color" oninput="settingsManager.onThemeColorChange('surfaceColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Surface color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Card/surface background</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Card</span>
+                        <input type="color" id="theme-card-color" oninput="settingsManager.onThemeColorChange('cardColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Card color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Glass card background</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Border</span>
+                        <input type="color" id="theme-border-color" oninput="settingsManager.onThemeColorChange('borderColor', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Border color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Default border color</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Text Primary</span>
+                        <input type="color" id="theme-text-primary" oninput="settingsManager.onThemeColorChange('textPrimary', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Primary text color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Main text color</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Text Secondary</span>
+                        <input type="color" id="theme-text-secondary" oninput="settingsManager.onThemeColorChange('textSecondary', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Secondary text color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Secondary text color</p>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Text Muted</span>
+                        <input type="color" id="theme-text-muted" oninput="settingsManager.onThemeColorChange('textMuted', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Muted text color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Disabled/muted text</p>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Gradient Enabled</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                          <input type="checkbox" id="theme-gradient-enabled" onchange="settingsManager.onThemeGradientToggle(this.checked)" class="sr-only peer" checked>
+                          <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+                        </label>
+                      </label>
+                      <p class="text-[10px] text-slate-400">Enable gradient text on headers</p>
+                    </div>
+                  </div>
+
+                  <!-- Gradient Colors -->
+                  <div class="grid grid-cols-1 md:grid-cols-3 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Gradient From</span>
+                        <input type="color" id="theme-gradient-from" oninput="settingsManager.onThemeColorChange('gradientFrom', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Gradient start color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Gradient start</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Gradient Via</span>
+                        <input type="color" id="theme-gradient-via" oninput="settingsManager.onThemeColorChange('gradientVia', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Gradient middle color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Gradient middle</p>
+                    </div>
+                    <div class="space-y-2">
+                      <label class="flex items-center justify-between text-xs font-semibold text-slate-300">
+                        <span>Gradient To</span>
+                        <input type="color" id="theme-gradient-to" oninput="settingsManager.onThemeColorChange('gradientTo', this.value)" class="w-8 h-8 rounded border-2 border-white/20 cursor-pointer" title="Gradient end color">
+                      </label>
+                      <p class="text-[10px] text-slate-400">Gradient end</p>
+                    </div>
+                  </div>
+
+                  <!-- Theme Identity -->
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-white/5">
+                    <div class="space-y-2">
+                      <label class="block text-xs font-semibold text-slate-300 mb-1">Theme Name</label>
+                      <input type="text" id="theme-name" oninput="settingsManager.onThemeNameChange(this.value)" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" placeholder="Default Cyber">
+                    </div>
+                    <div class="space-y-2">
+                      <label class="block text-xs font-semibold text-slate-300 mb-1">Theme Preset Key</label>
+                      <input type="text" id="theme-preset" class="w-full glass-input px-3.5 py-2 rounded-xl text-xs" placeholder="cyber" readonly>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Card 2: Glassmorphism, Transparency & Blur Controls -->
@@ -261,6 +494,21 @@ class SettingsManager {
                   <span>20px (Frost Glass)</span>
                   <span>40px (Heavy Cyber Blur)</span>
                 </div>
+              </div>
+
+              <!-- Animated 4K Background Toggle -->
+              <div class="space-y-3 pt-3 border-t border-white/5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <span class="text-slate-300 text-xs font-semibold">Animated 4K Background</span>
+                    <i data-lucide="film" class="w-3.5 h-3.5 text-purple-400"></i>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="set-bg-animated" onchange="settingsManager.toggleBgAnimated(this.checked)" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-500"></div>
+                  </label>
+                </div>
+                <p class="text-[11px] text-slate-400">Enable animated backgrounds (video loops, GIFs, APNG). When disabled, only static images will be used even if animated media is selected.</p>
               </div>
             </div>
 
@@ -383,7 +631,7 @@ class SettingsManager {
                 </div>
                 <div class="rounded-2xl overflow-hidden border border-white/10 h-40 bg-slate-950 relative group">
                   <img id="preview-bg-thumbnail" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=600&q=80" alt="Wallpaper Preview" class="w-full h-full object-cover">
-                  <video id="preview-bg-video" autoplay muted loop playsinline class="hidden w-full h-full object-cover"></video>
+                  <video id="preview-bg-video" autoplay muted loop playsinline preload="auto" crossorigin="anonymous" class="hidden w-full h-full object-cover"></video>
                   
                   <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent flex items-end p-3">
                     <p id="preview-bg-title" class="text-xs font-semibold text-white truncate">Active Wallpaper</p>
@@ -427,7 +675,7 @@ class SettingsManager {
 
   switchTab(tab) {
     this.activeTab = tab;
-    const tabs = ['browser', 'upload', 'url', 'favorites'];
+    const tabs = ['browser', 'upload', 'url', 'favorites', 'theme'];
 
     tabs.forEach(t => {
       const btn = document.getElementById(`tab-btn-${t}`);
@@ -448,6 +696,9 @@ class SettingsManager {
 
     if (tab === 'favorites') {
       this.renderFavoritesView();
+    }
+    if (tab === 'theme') {
+      this.loadThemeEditor();
     }
 
     if (window.lucide) lucide.createIcons();
@@ -483,6 +734,16 @@ class SettingsManager {
         document.getElementById('set-blur-bar').value = bVal;
         this.updateBlurUI(bVal);
       }
+
+      // Animated Background
+      if (s.panel_bg_animated !== undefined) {
+        this.currentTheme.bgAnimated = s.panel_bg_animated === '1' || s.panel_bg_animated === true;
+        const animatedToggle = document.getElementById('set-bg-animated');
+        if (animatedToggle) animatedToggle.checked = this.currentTheme.bgAnimated;
+      }
+
+      // Theme Colors
+      this.loadThemeColors(s);
 
       // Theme Mode UI
       this.updateThemeModeUI(this.currentTheme.themeMode);
@@ -805,6 +1066,9 @@ class SettingsManager {
   previewBackground(url, type = 'image', title = '') {
     if (!url) return;
     const isVideo = type === 'video' || /\.(mp4|webm|mkv|mov)($|\?)/i.test(url);
+    const isGif = /\.(gif|apng)($|\?)/i.test(url);
+    const isAnimatedEnabled = this.currentTheme.bgAnimated;
+    const useAnimation = isAnimatedEnabled && (isVideo || isGif);
 
     // Update Right Column Preview Box
     const thumbImg = document.getElementById('preview-bg-thumbnail');
@@ -814,15 +1078,30 @@ class SettingsManager {
 
     if (titleEl) titleEl.innerText = title || 'Custom Background';
 
-    if (isVideo) {
+    if (useAnimation) {
       if (thumbImg) thumbImg.classList.add('hidden');
       if (thumbVid) {
         thumbVid.classList.remove('hidden');
         thumbVid.src = url;
+        thumbVid.load();
+        thumbVid.muted = true;
+        thumbVid.loop = true;
+        thumbVid.playsInline = true;
+        const playPromise = thumbVid.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            thumbVid.pause();
+          });
+        }
       }
       if (badgeEl) {
-        badgeEl.innerText = 'Video Loop';
-        badgeEl.className = 'text-[10px] text-purple-400 uppercase font-mono font-bold';
+        if (isVideo) {
+          badgeEl.innerText = 'Video Loop';
+          badgeEl.className = 'text-[10px] text-purple-400 uppercase font-mono font-bold';
+        } else {
+          badgeEl.innerText = 'Animated (GIF/APNG)';
+          badgeEl.className = 'text-[10px] text-pink-400 uppercase font-mono font-bold';
+        }
       }
     } else {
       if (thumbVid) {
@@ -834,8 +1113,8 @@ class SettingsManager {
         thumbImg.src = url;
       }
       if (badgeEl) {
-        badgeEl.innerText = '4K Image';
-        badgeEl.className = 'text-[10px] text-cyan-400 uppercase font-mono font-bold';
+        badgeEl.innerText = isAnimatedEnabled ? 'Static (Animation Disabled)' : '4K Image';
+        badgeEl.className = isAnimatedEnabled ? 'text-[10px] text-amber-400 uppercase font-mono font-bold' : 'text-[10px] text-cyan-400 uppercase font-mono font-bold';
       }
     }
 
@@ -843,18 +1122,46 @@ class SettingsManager {
     const mainVid = document.getElementById('wallpaper-video');
     const mainLayer = document.getElementById('wallpaper-layer');
 
-    if (isVideo && mainVid) {
+    if (useAnimation && mainVid) {
+      // Video/GIF mode
       mainVid.src = url;
-      mainVid.classList.remove('hidden');
-      if (mainLayer) mainLayer.style.backgroundImage = 'none';
-      mainVid.play().catch(() => {});
-    } else {
-      if (mainVid) {
-        mainVid.classList.add('hidden');
-        mainVid.pause();
+      mainVid.load();
+      mainVid.classList.add('active');
+      mainVid.muted = true;
+      mainVid.loop = true;
+      mainVid.playsInline = true;
+      
+      // Add error handler to fallback to image
+      mainVid.onerror = () => {
+        mainVid.classList.remove('active');
+        mainVid.style.display = 'none';
+        if (mainLayer) {
+          mainLayer.style.display = 'block';
+          mainLayer.style.backgroundImage = `url('${url}')`;
+        }
+      };
+      
+      const playPromise = mainVid.play();
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          mainVid.pause();
+        });
       }
-      if (mainLayer) mainLayer.style.backgroundImage = '';
-      document.documentElement.style.setProperty('--panel-bg', `url('${url}')`);
+      if (mainLayer) {
+        mainLayer.style.display = 'none';
+        mainLayer.style.backgroundImage = 'none';
+      }
+    } else {
+      // Image mode
+      if (mainVid) {
+        mainVid.classList.remove('active');
+        mainVid.pause();
+        mainVid.src = '';
+      }
+      if (mainLayer) {
+        mainLayer.style.display = 'block';
+        mainLayer.style.backgroundImage = `url('${url}')`;
+      }
     }
   }
 
@@ -973,6 +1280,272 @@ class SettingsManager {
     app.toast(`Auto-save ${enabled ? 'enabled' : 'disabled'}`, 'info');
   }
 
+  toggleBgAnimated(enabled) {
+    this.currentTheme.bgAnimated = enabled;
+    app.toast(`Animated backgrounds ${enabled ? 'enabled' : 'disabled'}`, 'info');
+    if (this.currentTheme.autoSave) {
+      this.triggerAutoSave();
+    }
+  }
+
+  // Theme Editor Methods
+  loadThemeColors(s) {
+    const colorMap = {
+      primaryColor: 'theme_primary_color',
+      secondaryColor: 'theme_secondary_color',
+      accentColor: 'theme_accent_color',
+      successColor: 'theme_success_color',
+      warningColor: 'theme_warning_color',
+      errorColor: 'theme_error_color',
+      backgroundColor: 'theme_background_color',
+      surfaceColor: 'theme_surface_color',
+      cardColor: 'theme_card_color',
+      borderColor: 'theme_border_color',
+      textPrimary: 'theme_text_primary',
+      textSecondary: 'theme_text_secondary',
+      textMuted: 'theme_text_muted',
+      gradientEnabled: 'theme_gradient_enabled',
+      gradientFrom: 'theme_gradient_from',
+      gradientVia: 'theme_gradient_via',
+      gradientTo: 'theme_gradient_to',
+      themeName: 'theme_name',
+      themePreset: 'theme_preset'
+    };
+
+    for (const [themeKey, settingsKey] of Object.entries(colorMap)) {
+      if (s[settingsKey] !== undefined) {
+        this.currentTheme[themeKey] = s[settingsKey];
+      }
+    }
+
+    // Update UI color pickers
+    this.updateThemeColorPickers();
+    this.applyThemeToCSS();
+  }
+
+  updateThemeColorPickers() {
+    const pickers = [
+      'primaryColor', 'secondaryColor', 'accentColor', 'successColor',
+      'warningColor', 'errorColor', 'backgroundColor', 'surfaceColor',
+      'cardColor', 'borderColor', 'textPrimary', 'textSecondary', 'textMuted',
+      'gradientFrom', 'gradientVia', 'gradientTo'
+    ];
+
+    pickers.forEach(key => {
+      const input = document.getElementById(`theme-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`);
+      if (input && this.currentTheme[key]) {
+        input.value = this.currentTheme[key];
+      }
+    });
+
+    const gradientToggle = document.getElementById('theme-gradient-enabled');
+    if (gradientToggle) {
+      gradientToggle.checked = this.currentTheme.gradientEnabled === '1' || this.currentTheme.gradientEnabled === true;
+    }
+
+    const nameInput = document.getElementById('theme-name');
+    if (nameInput && this.currentTheme.themeName) {
+      nameInput.value = this.currentTheme.themeName;
+    }
+
+    const presetInput = document.getElementById('theme-preset');
+    if (presetInput && this.currentTheme.themePreset) {
+      presetInput.value = this.currentTheme.themePreset;
+    }
+
+    // Update preset button active state
+    document.querySelectorAll('.theme-preset-btn').forEach(btn => {
+      btn.classList.remove('border-cyan-500', 'border-2');
+      btn.classList.add('border-transparent');
+      if (btn.dataset.preset === this.currentTheme.themePreset) {
+        btn.classList.remove('border-transparent');
+        btn.classList.add('border-cyan-500', 'border-2');
+      }
+    });
+  }
+
+  loadThemeEditor() {
+    this.updateThemeColorPickers();
+  }
+
+  onThemeColorChange(key, value) {
+    this.currentTheme[key] = value;
+    this.applyThemeToCSS();
+    if (this.currentTheme.autoSave) {
+      this.triggerAutoSave();
+    }
+  }
+
+  onThemeGradientToggle(enabled) {
+    this.currentTheme.gradientEnabled = enabled ? '1' : '0';
+    this.applyThemeToCSS();
+    if (this.currentTheme.autoSave) {
+      this.triggerAutoSave();
+    }
+  }
+
+  onThemeNameChange(value) {
+    this.currentTheme.themeName = value;
+    if (this.currentTheme.autoSave) {
+      this.triggerAutoSave();
+    }
+  }
+
+  applyThemePreset(preset) {
+    const presets = {
+      cyber: {
+        primaryColor: '#0ea5e9', secondaryColor: '#a855f7', accentColor: '#f43f5e',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#0ea5e9', gradientVia: '#a855f7', gradientTo: '#f43f5e',
+        themeName: 'Default Cyber', themePreset: 'cyber'
+      },
+      ocean: {
+        primaryColor: '#06b6d4', secondaryColor: '#3b82f6', accentColor: '#ec4899',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#06b6d4', gradientVia: '#3b82f6', gradientTo: '#ec4899',
+        themeName: 'Ocean Breeze', themePreset: 'ocean'
+      },
+      forest: {
+        primaryColor: '#22c55e', secondaryColor: '#84cc16', accentColor: '#eab308',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#22c55e', gradientVia: '#84cc16', gradientTo: '#eab308',
+        themeName: 'Forest Green', themePreset: 'forest'
+      },
+      sunset: {
+        primaryColor: '#f97316', secondaryColor: '#ec4899', accentColor: '#8b5cf6',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#f97316', gradientVia: '#ec4899', gradientTo: '#8b5cf6',
+        themeName: 'Sunset Glow', themePreset: 'sunset'
+      },
+      violet: {
+        primaryColor: '#a855f7', secondaryColor: '#ec4899', accentColor: '#06b6d4',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#a855f7', gradientVia: '#ec4899', gradientTo: '#06b6d4',
+        themeName: 'Violet Dream', themePreset: 'violet'
+      },
+      blood: {
+        primaryColor: '#ef4444', secondaryColor: '#f97316', accentColor: '#fde047',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#ef4444', gradientVia: '#f97316', gradientTo: '#fde047',
+        themeName: 'Blood Moon', themePreset: 'blood'
+      },
+      gold: {
+        primaryColor: '#f59e0b', secondaryColor: '#fde047', accentColor: '#ef4444',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#f59e0b', gradientVia: '#fde047', gradientTo: '#ef4444',
+        themeName: 'Gold Rush', themePreset: 'gold'
+      },
+      monochrome: {
+        primaryColor: '#ffffff', secondaryColor: '#a3a3a3', accentColor: '#737373',
+        successColor: '#22c55e', warningColor: '#f59e0b', errorColor: '#ef4444',
+        backgroundColor: '#020617', surfaceColor: '#0f172a', cardColor: '#1e293b',
+        borderColor: '#334155', textPrimary: '#f8fafc', textSecondary: '#94a3b8',
+        textMuted: '#64748b', gradientEnabled: true,
+        gradientFrom: '#ffffff', gradientVia: '#a3a3a3', gradientTo: '#737373',
+        themeName: 'Monochrome', themePreset: 'monochrome'
+      }
+    };
+
+    const presetData = presets[preset];
+    if (!presetData) return;
+
+    // Apply preset to current theme
+    Object.assign(this.currentTheme, presetData);
+
+    // Update UI
+    this.updateThemeColorPickers();
+    this.applyThemeToCSS();
+
+    app.toast(`Applied ${presetData.themeName} theme!`, 'success');
+
+    if (this.currentTheme.autoSave) {
+      this.triggerAutoSave();
+    }
+  }
+
+  applyThemeToCSS() {
+    const t = this.currentTheme;
+    const root = document.documentElement;
+
+    // Core colors
+    root.style.setProperty('--theme-primary', t.primaryColor);
+    root.style.setProperty('--theme-primary-hover', this.adjustColor(t.primaryColor, -20));
+    root.style.setProperty('--theme-primary-glow', this.hexToRgba(t.primaryColor, 0.5));
+    root.style.setProperty('--theme-secondary', t.secondaryColor);
+    root.style.setProperty('--theme-secondary-hover', this.adjustColor(t.secondaryColor, -20));
+    root.style.setProperty('--theme-accent', t.accentColor);
+    root.style.setProperty('--theme-success', t.successColor);
+    root.style.setProperty('--theme-warning', t.warningColor);
+    root.style.setProperty('--theme-error', t.errorColor);
+
+    // Background & Surface
+    root.style.setProperty('--theme-background', t.backgroundColor);
+    root.style.setProperty('--theme-surface', t.surfaceColor);
+    root.style.setProperty('--theme-card', t.cardColor);
+    root.style.setProperty('--theme-card-hover', this.adjustColor(t.cardColor, 20));
+    root.style.setProperty('--theme-border', t.borderColor);
+    root.style.setProperty('--theme-border-light', this.hexToRgba(t.borderColor, 0.5));
+
+    // Text
+    root.style.setProperty('--theme-text-primary', t.textPrimary);
+    root.style.setProperty('--theme-text-secondary', t.textSecondary);
+    root.style.setProperty('--theme-text-muted', t.textMuted);
+
+    // Gradient
+    root.style.setProperty('--theme-gradient-enabled', t.gradientEnabled ? '1' : '0');
+    root.style.setProperty('--theme-gradient-from', t.gradientFrom);
+    root.style.setProperty('--theme-gradient-via', t.gradientVia);
+    root.style.setProperty('--theme-gradient-to', t.gradientTo);
+
+    // Overlay gradient
+    const overlayGradient = `radial-gradient(circle at top right, ${this.hexToRgba(t.primaryColor, 0.15)}, transparent 60%), radial-gradient(circle at bottom left, ${this.hexToRgba(t.secondaryColor, 0.1)}, transparent 60%), ${t.backgroundColor}`;
+    root.style.setProperty('--overlay-gradient', overlayGradient);
+
+    // Update body background for light/dark mode
+    const isLight = t.themeMode === 'light';
+    if (isLight) {
+      root.style.setProperty('--theme-background', this.adjustColor(t.backgroundColor, 90));
+      root.style.setProperty('--theme-surface', this.adjustColor(t.surfaceColor, 85));
+      root.style.setProperty('--theme-card', this.adjustColor(t.cardColor, 80));
+    }
+  }
+
+  hexToRgba(hex, alpha) {
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  adjustColor(hex, amount) {
+    const num = parseInt(hex.replace('#', ''), 16);
+    const r = Math.max(0, Math.min(255, (num >> 16) + amount));
+    const g = Math.max(0, Math.min(255, ((num >> 8) & 0x00FF) + amount));
+    const b = Math.max(0, Math.min(255, (num & 0x0000FF) + amount));
+    return '#' + (r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+  }
+
   triggerAutoSave() {
     clearTimeout(this.autoSaveTimer);
     this.autoSaveTimer = setTimeout(() => {
@@ -1032,8 +1605,14 @@ class SettingsManager {
           this.previewFavicon(data.url);
         } else if (type === 'background') {
           const isVideo = data.isVideo || /\.(mp4|webm|mkv|mov)($|\?)/i.test(data.url);
+          const isAnimated = data.isAnimated || isVideo || /\.(gif|apng)($|\?)/i.test(data.url);
           this.currentTheme.bg = data.url;
           this.currentTheme.bgType = isVideo ? 'video' : 'image';
+          if (isAnimated) {
+            this.currentTheme.bgAnimated = true;
+            const animatedToggle = document.getElementById('set-bg-animated');
+            if (animatedToggle) animatedToggle.checked = true;
+          }
           this.previewBackground(data.url, this.currentTheme.bgType, file.name);
           if (this.currentTheme.autoSave) {
             this.triggerAutoSave();
@@ -1072,10 +1651,31 @@ class SettingsManager {
       panel_bg: this.currentTheme.bg || '',
       panel_bg_type: this.currentTheme.bgType || 'image',
       panel_bg_category: this.activeCategory || 'all',
+      panel_bg_animated: this.currentTheme.bgAnimated ? '1' : '0',
       transparency_bar: String(this.currentTheme.transparency ?? 18),
       blur_bar: String(this.currentTheme.blur ?? 16),
       theme_mode: this.currentTheme.themeMode || 'dark',
-      registration_enabled: document.getElementById('set-registration')?.checked ? '1' : '0'
+      registration_enabled: document.getElementById('set-registration')?.checked ? '1' : '0',
+      // Theme Colors
+      theme_primary_color: this.currentTheme.primaryColor,
+      theme_secondary_color: this.currentTheme.secondaryColor,
+      theme_accent_color: this.currentTheme.accentColor,
+      theme_success_color: this.currentTheme.successColor,
+      theme_warning_color: this.currentTheme.warningColor,
+      theme_error_color: this.currentTheme.errorColor,
+      theme_background_color: this.currentTheme.backgroundColor,
+      theme_surface_color: this.currentTheme.surfaceColor,
+      theme_card_color: this.currentTheme.cardColor,
+      theme_border_color: this.currentTheme.borderColor,
+      theme_text_primary: this.currentTheme.textPrimary,
+      theme_text_secondary: this.currentTheme.textSecondary,
+      theme_text_muted: this.currentTheme.textMuted,
+      theme_gradient_enabled: this.currentTheme.gradientEnabled ? '1' : '0',
+      theme_gradient_from: this.currentTheme.gradientFrom,
+      theme_gradient_via: this.currentTheme.gradientVia,
+      theme_gradient_to: this.currentTheme.gradientTo,
+      theme_name: this.currentTheme.themeName,
+      theme_preset: this.currentTheme.themePreset
     };
 
     try {
