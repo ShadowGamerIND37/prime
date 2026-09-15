@@ -1,85 +1,75 @@
-# 🎮 Prime Minecraft - Full Node.js Game & App Server Web Management Panel
+# 🎮 Prime Minecraft
+
+**Full-Stack Node.js Game & Application Server Management Panel**
 
 [![Node.js Version](https://img.shields.io/badge/node-%3E%3D18.0.0-brightgreen.svg)](https://nodejs.org)
-[![Version](https://img.shields.io/badge/release-v2.3.0-blue.svg)](https://github.com/nobita329/Prime-Minecraft/releases/tag/v2.3.0)
+[![Release](https://img.shields.io/badge/release-v1.0-blue.svg)](https://github.com/ShadowGamerIND37/prime/releases/tag/v1.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Theme: Full Black](https://img.shields.io/badge/Theme-Full%20Black%20OLED-black.svg)](#-theme--customization-engine)
+[![Theme](https://img.shields.io/badge/Theme-Full%20Black%20OLED-000000.svg)](#-theme--customization-engine)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](#-contributing)
+[![Developer](https://img.shields.io/badge/Developer-ShadowGamerIND-orange.svg)](https://github.com/ShadowGamerIND37)
 
-**Prime Minecraft** is a high-performance, full-featured game and application server web management panel built entirely in **Node.js**. Designed as a modern, lightweight, and blazingly fast alternative to Pterodactyl, Prime Minecraft features real-time terminal streaming, deep Minecraft server management (Live Player Manager, Addon Marketplace, World Installer, Version Changer), an embedded SFTP server, and a fully customizable Glassmorphic Full Black OLED theme engine.
+Prime Minecraft is a high-performance, self-hosted server management panel built entirely on **Node.js** — a modern, lightweight, and fast alternative to Pterodactyl. It combines real-time terminal streaming, deep Minecraft-specific tooling (live player management, an addon marketplace, world installer, and one-click version switching), an embedded SFTP server, and a fully customizable glassmorphic "Full Black OLED" theme engine.
+
+**Developer:** [ShadowGamerIND](https://github.com/ShadowGamerIND37) · **Version:** `v1.0`
 
 ---
 
-## 🚀 Port Configuration
+## 📑 Table of Contents
 
-| Service | Port | Description |
+- [Features](#-features)
+- [Supported Runtimes](#-supported-runtimes--environments)
+- [Port Reference](#-port-reference)
+- [Prerequisites](#-prerequisites)
+- [Installation](#️-installation--quick-start)
+- [Directory Structure](#-directory-structure)
+- [SFTP Access](#-sftp-connection-details)
+- [Default Credentials & Security](#-default-credentials--security)
+- [Troubleshooting](#-troubleshooting)
+- [Contributing](#-contributing)
+- [License](#-license)
+
+---
+
+## ✨ Features
+
+### 👥 Minecraft Player Manager
+Real-time and offline player administration in one place.
+- **Live roster** — ping, gamemode, health, food level, XP, and UUID for every connected player.
+- **Live inventory viewer** — inspect armor slots, offhand, main inventory, and ender chest with item icons, stack counts, and durability.
+- **Statistics & advancements** — mob kills, blocks mined, items crafted, distance traveled, and full advancement-tree tracking (Story, Nether, The End, Adventure, Husbandry).
+- **Moderation actions** — kick, ban, pardon, IP-ban, and OP/DEOP (levels 1–4), available live or fully offline (whitelist, ops, bans).
+- **One-click startup** from inside the Player Manager when the server is offline.
+
+### 🧩 Addon Marketplace
+Unified access to the three major Minecraft content providers:
+
+| Provider | Coverage | Integration |
 | :--- | :--- | :--- |
-| **Web UI** | `3001` | Main Web Panel Interface & Live Terminal WebSocket (`http://localhost:3001`) |
-| **Panel / Daemon API** | `3003` | REST API for external integrations (WHMCS, Discord Bots, Billing) |
-| **Embedded SFTP Server** | `3004` | Built-in SFTP server for FileZilla, WinSCP, Cyberduck (`sftp://localhost:3004`) |
+| [Modrinth](https://modrinth.com) | Mods, plugins, datapacks, resource packs, modpacks | Direct API |
+| [CurseForge](https://www.curseforge.com) | Plugins, mods, worlds/maps, modpacks | `CURSEFORGE_API_KEY` via `api.curseforge.com/v1` |
+| [SpigotMC](https://www.spigotmc.org) | 90,000+ Bukkit/Spigot/Paper plugins | Spiget v2 (`api.spiget.org/v2`) |
 
----
+Additional marketplace capabilities:
+- Version filtering from **1.21 (Tricky Trials)** down to **1.5.2**, with quick-select pills.
+- **10 content categories**: Version Changer, Player Manager, World Manager, Plugins, Mods, Datapacks, Resource Packs, Modpacks, Properties UI, and Server Tools.
+- **Server Tools** bundle: ViaVersion, ViaBackwards, GeyserMC, Floodgate, Spark Profiler, Chunky, LuckPerms, SkinsRestorer, Aikar's JVM flags, the Playit.gg tunnel manager, and a log cleaner.
+- **Properties UI** — visual `server.properties` editor with ON/OFF toggles, live color-coded MOTD preview (`§`/`&` codes), and a "Restart to Apply" action.
 
-## ✨ Key Features & Capabilities
+### 🔄 Version Changer (MCJars Engine)
+Switch server core and Minecraft version in a single click, with automatic jar backup and download verification. Supported cores: **Paper, Purpur, Spigot, Vanilla, Fabric, Forge, NeoForge, BungeeCord, Velocity**, and **Bedrock Dedicated Server**.
 
-### 1. 👥 Minecraft Player Manager (Real-Time Live Monitoring & Offline Roster)
-- **Live Player Roster**: View connected players with live ping, gamemode, health, food bar, XP level, and UUID.
-- **🎒 Interactive Live Inventory Viewer**: Inspect player armor slots, offhand, main inventory, and ender chest with live item icons, stack counts, and durability.
-- **📊 Detailed Player Statistics**: In-depth tracking of mob kills, blocks mined, items crafted, and distance traveled.
-- **🏆 Advancements & Achievements Tracker**: Complete advancement tree tracking across Story, Nether, The End, Adventure, and Husbandry.
-- **⚡ Live Moderation Actions**: Instant Kick, Ban, Pardon, IP-Ban, OP (Levels 1–4), and DEOP.
-- **🛡️ Full Offline Support**: Add/remove Whitelist entries, manage Operators, and ban/unban players even when the server is powered down.
-- **🚀 1-Click Server Startup**: Direct power launch button inside Player Manager when the server is offline.
+### 🎨 Theme & Customization Engine
+- **Full Black OLED** default theme with a one-click light/dark toggle.
+- Integrated [4kwallpapers.com](https://4kwallpapers.com) browser — 36 categories, search, pagination, favorites, and one-click apply.
+- Custom media backgrounds: images (`JPG`, `PNG`, `WEBP`, `GIF`) or looping video (`MP4`, `WEBM`, up to 100MB).
+- Live transparency and blur sliders (CSS `backdrop-filter`), with debounced auto-save and one-click reset to default.
 
-### 2. 🧩 Addon Marketplace (Consolidated A to Z Suite)
-- **🌐 3 Universal Web Providers (A to Z)**:
-  1. **Modrinth** (`https://modrinth.com`): High-speed direct downloads for modern Minecraft mods, plugins, datapacks, resource packs, and modpacks.
-  2. **CurseForge** (`https://www.curseforge.com`): Full ecosystem integration via `CURSEFORGE_API_KEY` and base URL (`https://api.curseforge.com/v1`) covering plugins, mods, worlds/maps, and modpacks.
-  3. **SpigotMC** (`https://www.spigotmc.org`): Direct integration via Spiget v2 REST API (`api.spiget.org/v2`), giving access to 90,000+ Bukkit, Spigot, and Paper plugins with version compatibility lists and 1-click `.jar` installation.
-- **🎮 Minecraft Version Filtering (A to Z)**:
-  - Comprehensive dropdown selector covering every release from **Minecraft 1.21 Tricky Trials** all the way down to **1.5.2**, plus interactive quick version selector pills for instant filtering.
-- **📂 10 Consolidated Categories ("Sab Alg Alg")**:
-  - **Version Changer**: 1-click server core and engine switcher (Paper, Purpur, Spigot, Fabric, Forge, NeoForge, Velocity, BungeeCord).
-  - **Player Manager**: Complete live and offline player moderation suite with inventory inspections.
-  - **World Manager (A to Z)**: World creation, dimension management, CurseForge/Modrinth world store, instant generator profiles (Void, Superflat, Amplified, Large Biomes), and ZIP archive import/export.
-  - **Plugins**: Bukkit, Spigot, Paper, Purpur, Folia, Velocity, BungeeCord plugins with version filtering.
-  - **Mods**: Fabric, Forge, NeoForge, Quilt mods with loader badges and 1-click download to `mods/`.
-  - **Datapacks**: Vanilla game extensions deployed into `world/datapacks/`.
-  - **Resource Packs**: Server-side and client resource packs deployed into `resourcepacks/`.
-  - **Modpacks**: CurseForge and Modrinth complete modpack packages.
-  - **Properties UI**: Visual `server.properties` editor with dedicated **`[ 🟢 ON ]` `[ ⚪ OFF ]`** segmented switchers, live color-coded MOTD preview (`§` and `&` codes), instant state sync, and a **"Restart to Apply"** quick reboot action button.
-  - **Server Tools**: 1-click essential server utility suite (ViaVersion, ViaBackwards, GeyserMC, Floodgate, Spark Profiler, Chunky, LuckPerms, SkinsRestorer), Aikar's JVM performance flags, Playit.gg tunnel manager, and server log cleaner.
-
-### 3. 🔄 Minecraft Version Changer (MCJars Engine)
-- Switch server software and Minecraft versions with a single click.
-- Supported server cores:
-  - **Paper**, **Purpur**, **Spigot**, **Vanilla**, **Fabric**, **Forge**, **NeoForge**, **BungeeCord**, **Velocity**, and **Bedrock Dedicated Server**.
-- Automatic server jar backup, download verification, and configuration adjustments.
-
-### 4. 🎨 Theme & Customization Engine (Full Black Edition)
-- **🖤 Default Theme: Full Black OLED**:
-  - Pure pitch black background (`#000000`), deep black frosted glass cards, and high-contrast neon accents.
-  - One-click Light / Dark mode toggle with adapted frosted-glass styling.
-- **🖼️ Integrated 4K Wallpapers Browser ([4kwallpapers.com](https://4kwallpapers.com/))**:
-  - **36 Categories**: Black & Dark, Space, Gaming, Anime, Abstract, Cars, Nature, Sci-Fi, Minimal, CGI, and more.
-  - **Search & Pagination**: Full pagination (Next / Previous, direct page jump) and instant keyword search.
-  - **1-Click Apply**: Set any 4K wallpaper across the panel immediately.
-  - **Favorites**: Bookmark favorite wallpapers with instant heart toggle saved to local storage.
-  - **Download**: Direct link to full 4K UHD resolutions.
-- **📹 Custom Media Backgrounds**:
-  - Upload custom high-res images (`JPG, PNG, WEBP, GIF`) or looping background videos (`MP4, WEBM` up to 100MB).
-  - Custom media URL input with real-time format detection and "Test & Live Preview".
-- **🎚️ Real-Time Transparency Slider (`0% ---------|--------- 100%`)**:
-  - Dynamic opacity control across all glass panels with instantaneous CSS variable updates.
-- **✨ Real-Time Blur Slider (`0px ---------|---------- 40px`)**:
-  - Frosted glassmorphism using CSS `backdrop-filter: blur()` working over both image and video backgrounds.
-- **Auto-Save & Reset**:
-  - Debounced auto-save on slider dragging and a one-click **"Reset to Default"** action.
-
-### 5. 🌐 Playit.gg Zero-Port Tunnel Integration
-- **Addon Marketplace 1-Click Install**: Installs the latest official `playit-minecraft-plugin.jar` automatically into `plugins/` (Paper, Purpur, Spigot, Velocity) or `mods/` (Fabric, Forge, NeoForge).
-- **Live Status & Address Detection**: Scans logs to detect claim URLs and public player connection domains (e.g. `*.gl.joinmc.link`).
-- **Secret Key Binding**: Configures `secret_key` directly into `playit.toml`.
-- **Native Linux System Daemon (playit CLI)**:
+### 🌐 Playit.gg Tunnel Integration
+- One-click plugin/mod install (Paper, Purpur, Spigot, Velocity, Fabric, Forge, NeoForge).
+- Automatic detection of claim URLs and public connection domains from server logs.
+- Secret key binding directly into `playit.toml`.
+- Native Linux daemon install via `./menu.sh playit` or manually:
   ```bash
   curl -SsL https://packages.playit.gg/keys/playit.gpg | gpg --dearmor | sudo tee /usr/share/keyrings/playit.gpg >/dev/null
   sudo chmod 0644 /usr/share/keyrings/playit.gpg
@@ -87,43 +77,66 @@
   sudo apt update
   sudo apt install -y playit
   ```
-  Or 1-click via Prime Minecraft CLI: `./menu.sh playit` (or interactive `menu.sh` Option 8).
 
 ---
 
 ## 📦 Supported Runtimes & Environments
 
-### 1. 🎮 Minecraft (Java & Bedrock)
-- **Java Versions**:
-  - `Java 25`, `Java 21`, `Java 17`, `Java 16`, `Java 11`, `Java 8` (`ghcr.io/pterodactyl/yolks:java_*`)
+| Category | Versions | Image Source |
+| :--- | :--- | :--- |
+| **Minecraft (Java)** | 25, 21, 17, 16, 11, 8 | `ghcr.io/pterodactyl/yolks:java_*` |
+| **Minecraft (Bedrock)** | Bedrock Dedicated Server | via Version Changer |
+| **Node.js** | 25, 24, 23, 22, 21, 20, 19, 18, 16, 14, 12 | `ghcr.io/ptero-eggs/yolks:nodejs_*` |
+| **Python** | 3.13, 3.12, 3.11, 3.10, 3.9, 3.8, 3.7, 2.7 | `ghcr.io/ptero-eggs/yolks:python_*` |
 
-### 2. ⚡ Node.js Apps & Discord Bots
-- **Node.js Versions**:
-  - `Nodejs 25`, `24`, `23`, `22`, `21`, `20`, `19`, `18`, `16`, `14`, `12` (`ghcr.io/ptero-eggs/yolks:nodejs_*`)
+---
 
-### 3. 🐍 Python Apps & Bots
-- **Python Versions**:
-  - `Python 3.13`, `3.12`, `3.11`, `3.10`, `3.9`, `3.8`, `3.7`, `2.7` (`ghcr.io/ptero-eggs/yolks:python_*`)
+## 🔌 Port Reference
+
+| Service | Port | Description |
+| :--- | :--- | :--- |
+| **Web UI** | `3001` | Main panel interface and live terminal WebSocket (`http://localhost:3001`) |
+| **Panel / Daemon API** | `3003` | REST API for external integrations (WHMCS, Discord bots, billing systems) |
+| **Embedded SFTP** | `3004` | Built-in SFTP server (FileZilla, WinSCP, Cyberduck) |
+
+Make sure these ports are open on your firewall/security group if you plan to access the panel remotely.
+
+---
+
+## ✅ Prerequisites
+
+Before installing, make sure the host has:
+
+- **Node.js** ≥ 18.0.0 and npm
+- **Docker** and **Docker Engine API access** (used for container lifecycle management)
+- **Git**
+- A Linux host (Debian/Ubuntu recommended) with `sudo` access for the automated installer
+- Open inbound access on ports `3001`, `3003`, and `3004` (adjust as needed)
 
 ---
 
 ## 🛠️ Installation & Quick Start
 
-### 1. 🚀 1-Click Universal Auto Install (`menu.sh`)
-Run the full automated installer directly from the web or locally (installs Node.js 20 LTS, PM2, dependencies, generates `.env`, seeds database, and starts PM2 with boot autostart):
-```bash
-# Instant One-Liner from GitHub
-bash <(curl -sSL https://raw.githubusercontent.com/shadow/Prime-Minecraft/main/menu.sh)
+### 1. One-Click Automated Install
 
-# Or locally
+```bash
+# One-liner — downloads and runs menu.sh directly
+bash <(curl -sSL https://raw.githubusercontent.com/ShadowGamerIND37/prime/main/menu.sh)
+
+# Or locally, non-interactive
 ./menu.sh auto -y
-# or interactive
+
+# Or locally, interactive
 ./menu.sh auto
-# or via npm
+
+# Or via npm
 npm run setup
 ```
 
-### 2. Interactive Management Menu (`menu.sh`)
+This installs Node.js 20 LTS, PM2, and all dependencies; generates a `.env` file; seeds the database; and starts the panel under PM2 with boot autostart enabled.
+
+### 2. Interactive Management Menu
+
 ```bash
 ./menu.sh
 # or
@@ -132,19 +145,21 @@ bash menu.sh
 npm run menu
 ```
 
-Direct shortcuts available:
-- `./menu.sh auto` / `./menu.sh setup` - 1-Click Auto Install, Setup, Database Seeding & PM2 Launch
-- `./menu.sh update` - 1-Click Auto Update (Git pull, DB migrations, dependencies & PM2 restart)
-- `./menu.sh usercreate` - Create new admin or normal user
-- `./menu.sh pm2` - PM2 Process Management menu (Start, Stop, Restart, Logs, Autostart)
-- `./menu.sh status` - Check port listening status (`3001`, `3003`, `3004`) and database
-- `./menu.sh playit` - Install native Playit.gg zero-port tunnel CLI
-- `./menu.sh uninstall` - Safely remove or clean Prime Minecraft
+| Command | Description |
+| :--- | :--- |
+| `./menu.sh auto` / `./menu.sh setup` | One-click install, setup, database seeding & PM2 launch |
+| `./menu.sh update` | Auto-update: git pull, DB migrations, dependencies, PM2 restart |
+| `./menu.sh usercreate` | Create a new admin or standard user |
+| `./menu.sh pm2` | PM2 process menu (start, stop, restart, logs, autostart) |
+| `./menu.sh status` | Check listening status of ports `3001`/`3003`/`3004` and the database |
+| `./menu.sh playit` | Install the native Playit.gg zero-port tunnel CLI |
+| `./menu.sh uninstall` | Safely remove or clean a Prime Minecraft install |
 
-### 3. Manual CLI Setup
+### 3. Manual Setup
+
 ```bash
 # Clone the repository
-git clone https://github.com/shadow/Prime-Minecraft.git
+git clone https://github.com/ShadowGamerIND37/prime.git
 cd Prime-Minecraft
 
 # Install dependencies
@@ -153,10 +168,10 @@ npm install
 # Run automated directory, .env & database setup
 npm run setup
 
-# Create Administrator Account (if custom required)
+# Create an administrator account
 npm run createuser
 
-# Launch with PM2 (Recommended for Production)
+# Launch with PM2 (recommended for production)
 npm run pm2:start
 npm run pm2:logs
 ```
@@ -168,81 +183,123 @@ npm run pm2:logs
 ```
 /
 ├── bin/
-│   ├── setup.js             # Automated setup, directory creator & database seeder
-│   ├── createuser.js        # Interactive CLI user creation script
-│   └── build.js             # Directory verification & preparation script
+│   ├── setup.js              # Automated setup, directory creation & database seeding
+│   ├── createuser.js         # Interactive CLI user creation
+│   └── build.js              # Directory verification & preparation
 ├── data/
-│   └── prime-minecraft.sqlite        # SQLite database (WAL mode enabled)
+│   └── prime-minecraft.sqlite # SQLite database (WAL mode)
 ├── prime/
-│   ├── servers/             # Sandboxed server directories (server1, server2, ...)
-│   └── backups/             # Server snapshot .zip archives
+│   ├── servers/              # Sandboxed server directories (server1, server2, ...)
+│   └── backups/              # Server snapshot .zip archives
 ├── public/
-│   ├── index.html           # Main SPA HTML structure
-│   ├── css/
-│   │   └── style.css        # Full Black OLED Glassmorphic styles & sliders
+│   ├── index.html            # Main SPA entry point
+│   ├── css/style.css         # Full Black OLED glassmorphic styles & sliders
 │   └── js/
-│       ├── app.js           # Core router, API requester & toasts
-│       ├── auth.js          # Authentication, 2FA TOTP & profile
-│       ├── settings.js      # Customization engine, 4K wallpapers, transparency & blur
-│       ├── marketplace.js   # CurseForge, Modrinth & SpigotMC Addon Marketplace
-│       ├── playerManager.js # Minecraft Live Player Manager & Inventory Viewer
-│       ├── worldManager.js  # Minecraft World Installer & Dimension Manager
-│       ├── versionChanger.js# MCJars Version & Core switcher
-│       ├── console.js       # xterm.js terminal & server management suite
-│       ├── filemanager.js   # Sandboxed file manager & Ace code editor
-│       └── admin.js         # Server wizard, nodes, allocations, users, API
+│       ├── app.js            # Core router, API requester & toasts
+│       ├── auth.js           # Authentication, 2FA TOTP & profile
+│       ├── settings.js       # Customization engine, wallpapers, transparency & blur
+│       ├── marketplace.js    # CurseForge, Modrinth & SpigotMC integration
+│       ├── playerManager.js  # Live player management & inventory viewer
+│       ├── worldManager.js   # World installer & dimension manager
+│       ├── versionChanger.js # MCJars version & core switcher
+│       ├── console.js        # xterm.js terminal & server controls
+│       ├── filemanager.js    # Sandboxed file manager & Ace code editor
+│       └── admin.js          # Server wizard, nodes, allocations, users, API
 ├── src/
-│   ├── index.js             # Main server launcher (Ports 3001, 3003, 3004)
+│   ├── index.js               # Main server launcher (ports 3001, 3003, 3004)
 │   ├── config/
-│   │   ├── config.js        # Global app settings, ports & default theme
-│   │   └── images.js        # Docker image presets (Minecraft, Node, Python)
+│   │   ├── config.js           # Global app settings, ports & default theme
+│   │   └── images.js           # Docker image presets (Minecraft, Node, Python)
 │   ├── database/
-│   │   ├── db.js            # SQLite database promise client & schema
-│   │   └── seed.js          # Default settings, locations, nodes, allocations
+│   │   ├── db.js                # SQLite client & schema
+│   │   └── seed.js              # Default settings, locations, nodes, allocations
 │   ├── middleware/
-│   │   ├── auth.js          # JWT & role permission middlewares
-│   │   └── upload.js        # Multer upload handlers (100MB media limit)
+│   │   ├── auth.js               # JWT & role permission middleware
+│   │   └── upload.js             # Multer upload handlers (100MB media limit)
 │   ├── services/
-│   │   ├── dockerService.js # Dockerode container lifecycle
-│   │   ├── runnerService.js # Dual container / native process runner
-│   │   ├── mcjarsService.js # MCJars.app integration & core switcher
-│   │   ├── wallpaperService.js # 4KWallpapers scraper, cache & category engine
-│   │   ├── playerService.js # Minecraft player NBT/JSON parser & RCON actions
-│   │   ├── worldService.js  # World generation, dimensions & zip archives
-│   │   ├── curseforgeService.js  # CurseForge REST API v1 integration
-│   │   ├── spigotService.js # SpigotMC / Spiget API v2 integration
-│   │   ├── propertiesService.js  # Minecraft server.properties GUI schema
+│   │   ├── dockerService.js      # Dockerode container lifecycle
+│   │   ├── runnerService.js      # Dual container/native process runner
+│   │   ├── mcjarsService.js      # MCJars.app integration & core switching
+│   │   ├── wallpaperService.js   # 4KWallpapers scraper, cache & categories
+│   │   ├── playerService.js      # Player NBT/JSON parsing & RCON actions
+│   │   ├── worldService.js       # World generation, dimensions & zip archives
+│   │   ├── curseforgeService.js  # CurseForge REST API v1
+│   │   ├── spigotService.js      # SpigotMC / Spiget API v2
+│   │   ├── propertiesService.js  # server.properties GUI schema
 │   │   ├── marketplaceService.js # Addon downloader & package installer
 │   │   ├── fileManagerService.js # Sandboxed filesystem operations
-│   │   ├── backupService.js # Zip backup creation & restoration
-│   │   ├── scheduleService.js # Cron scheduled tasks
-│   │   └── activityService.js # System-wide audit logging
+│   │   ├── backupService.js      # Zip backup creation & restoration
+│   │   ├── scheduleService.js    # Cron scheduled tasks
+│   │   └── activityService.js    # System-wide audit logging
 │   ├── sftp/
-│   │   └── sftpServer.js    # Embedded SSH2 SFTP Server on port 3004
-│   ├── routes/              # Express REST API routes
+│   │   └── sftpServer.js         # Embedded SSH2 SFTP server (port 3004)
+│   ├── routes/                   # Express REST API routes
 │   └── websocket/
-│       └── consoleWs.js     # Real-time WebSocket terminal & stats
-└── ecosystem.config.js      # PM2 clustering configuration
+│       └── consoleWs.js          # Real-time WebSocket terminal & stats
+└── ecosystem.config.js           # PM2 clustering configuration
 ```
 
 ---
 
 ## 🔒 SFTP Connection Details
 
-Connect using any SFTP client (e.g., FileZilla, WinSCP, Cyberduck):
-- **Host**: `localhost` (or server IP)
-- **Port**: `3004`
-- **Username**: `<username>.<server_id>` (e.g. `admin.1` for Server #1)
-- **Password**: Your Prime Minecraft account password
+Connect with any SFTP client (FileZilla, WinSCP, Cyberduck):
+
+| Field | Value |
+| :--- | :--- |
+| Host | `localhost` (or your server's IP) |
+| Port | `3004` |
+| Username | `<username>.<server_id>` (e.g. `admin.1` for server #1) |
+| Password | Your Prime Minecraft account password |
 
 ---
 
-## 🛡️ Default Credentials
-- **Username**: `admin`
-- **Password**: `admin`
-- **Login URL**: `http://localhost:3001`
+## 🛡️ Default Credentials & Security
+
+| Field | Value |
+| :--- | :--- |
+| Username | `admin` |
+| Password | `admin` |
+| Login URL | `http://localhost:3001` |
+
+**Change these immediately after your first login.** Shipping or exposing a panel with default credentials on a public IP is a serious security risk. Recommended hardening steps:
+
+1. Change the default admin password on first login.
+2. Enable 2FA (TOTP) for all admin accounts.
+3. Put the panel behind a reverse proxy with HTTPS (e.g. Nginx + Let's Encrypt).
+4. Restrict inbound access to ports `3001`/`3003`/`3004` to trusted IPs where possible.
+5. Rotate `CURSEFORGE_API_KEY` and any other secrets stored in `.env` if they are ever exposed.
+
+---
+
+## 🧯 Troubleshooting
+
+| Symptom | Likely Cause | Fix |
+| :--- | :--- | :--- |
+| Panel won't start | Port already in use | Run `./menu.sh status` to check `3001`/`3003`/`3004`, then free the conflicting port |
+| Docker containers fail to launch | Docker daemon not running or user lacks permissions | `sudo systemctl start docker`; add your user to the `docker` group |
+| SFTP login fails | Wrong username format | Use `<username>.<server_id>`, not just the plain username |
+| Addon downloads fail | Missing or invalid API key | Confirm `CURSEFORGE_API_KEY` is set correctly in `.env` |
+| Changes to `.env` not applied | Panel not restarted | Restart via `npm run pm2:start` or `./menu.sh pm2` |
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome. If you'd like to help:
+
+1. Fork the repository and create a feature branch.
+2. Keep changes focused and include a clear description of what and why.
+3. Open a pull request against `main`.
+
+Please open an issue first for larger changes so they can be discussed before implementation.
 
 ---
 
 ## 📄 License
+
 This project is open-source software licensed under the [MIT License](LICENSE).
+
+---
+
+<p align="center">Developed by <a href="https://github.com/ShadowGamerIND37">ShadowGamerIND</a> · v1.0</p>
